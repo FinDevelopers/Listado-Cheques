@@ -1,4 +1,6 @@
-def read_cheques(file):
+import csv
+
+def get_cheques(file):
     with open(file, 'r') as archivo:
         cheques = archivo.read().splitlines()
         cheques.pop(0)
@@ -42,9 +44,18 @@ def print_cheques(cheques):
 
 
 
+def export_csv(cheques):
+    with open ("nombreArchivo.csv", "w") as archivo:
+        escribirArchivo = csv.DictWriter(archivo, cheques[0].keys())
+        escribirArchivo.writeheader()
+        for cheque in cheques:
+            escribirArchivo.writerow(cheque)
+
+
 def main(csv):
-    cheques = read_cheques(csv)
-    print_cheques(cheques)
+    cheques = get_cheques(csv)
+    #print_cheques(cheques)
+    export_csv(cheques)
 
 main('cheques.csv')
 
