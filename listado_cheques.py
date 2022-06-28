@@ -3,6 +3,7 @@ import csv
 def get_cheques(file):
     with open(file, 'r') as archivo:
         cheques = archivo.read().splitlines()
+        print(cheques)
         cheques.pop(0)
         chequesConFormato = []
         for l in cheques:
@@ -45,16 +46,18 @@ def print_cheques(cheques):
 
 
 def export_csv(cheques):
-    with open ("nombreArchivo.csv", "w") as archivo:
+    with open ("nombreArchivo.csv", "w", newline='') as archivo:
         escribirArchivo = csv.DictWriter(archivo, cheques[0].keys())
         escribirArchivo.writeheader()
         for cheque in cheques:
             escribirArchivo.writerow(cheque)
 
 
+
+
 def main(csv):
     cheques = get_cheques(csv)
-    #print_cheques(cheques)
+    # print_cheques(cheques)
     export_csv(cheques)
 
 main('cheques.csv')
