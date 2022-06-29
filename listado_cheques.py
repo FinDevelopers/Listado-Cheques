@@ -1,9 +1,12 @@
+# PASO 1 !!
+# importar librerias
 import csv
 import sys
 import os 
+from datetime import datetime
 
 
-# PASO 2 !
+# PASO 2 !!
 if len(sys.argv) < 5:
     print('Hay que ingresar por lo menos 4 parámetros') 
     exit()
@@ -41,7 +44,9 @@ if tipo not in ['EMITIDO','DEPOSITADO']:
 
 if estado and estado not in ['PENDIENTE','APROBADO', 'RECHAZADO']:
     print('No es un parámetro de tipo válido')
+    exit()
 
+# Rango fecha: xx-xx-xxxx:yy-yy-yyyy
 if fecha:
     if len(fecha.split(':')) != 2:
         print('No es una fecha correcta')
@@ -65,14 +70,12 @@ if fecha:
         exit()
     
 
-
 def get_cheques(file):
     with open(file, 'r') as archivo:
-        cheques = archivo.read().splitlines()
-        cheques.pop(0)
+        cheques = csv.reader(archivo, delimiter=",")
         chequesConFormato = []
-        for l in cheques:
-            cheque = l.split(',')
+        for cheque in cheques:
+            print(cheque)
             chequesConFormato.append(
                 {
                     "NroCheque" : cheque[0],
@@ -87,44 +90,40 @@ def get_cheques(file):
                     "Tipo": cheque[9],
                     "Estado" : cheque[10]
                 })
-            
+        chequesConFormato.pop(0)
         return chequesConFormato
-         
 
-
-# [{---},{},{},{},{}]
-#cheques[0]["NroCheque"] ==> '123456789'
-#cheques[1]["NroCheque"] 
-#cheques[2]
-
-#cheque["NroCheque"]  ==> '123456789'
 
 def print_cheques(cheques):
     for cheque in cheques:
         print ("----------------------------------------")   
         print ("CHEQUE")
-        print (f'\tCUENTA: {cheque["NumeroCuentaOrigen"]}')
+        print (f'\tNUMERO DE CHEQUE: {cheque["NroCheque"]}')
+        print (f'\tCODIGO DE BANCO: {cheque["CodigoBanco"]}')
+        print (f'\tCODIGO DE SUCURSAL: {cheque["CodigoScurusal"]}')
+        print (f'\tNUMERO DE CUENTA: {cheque["NumeroCuentaOrigen"]}')
+        print (f'\tNUMERO DE CUENTA DESTINO: {cheque["NumeroCuentaDestino"]}')
         print (f'\tVALOR: {cheque["Valor"]}')
         print (f'\tFECHA ORIGEN: {cheque["FechaOrigen"]}')
         print (f'\tFECHA PAGO: {cheque["FechaPago"]}')
+        print (f'\tDNI: {cheque["DNI"]}')
+        print (f'\tTIPO DE CHEQUE: {cheque["Tipo"]}')
+        print (f'\tESTADO: {cheque["Estado"]}')
     print ("----------------------------------------") 
 
 
-
 def export_csv(cheques):
-    with open ("nombreArchivo.csv", "w", newline='') as archivo:
-        escribirArchivo = csv.DictWriter(archivo, cheques[0].keys())
-        escribirArchivo.writeheader()
+    with open (f"{dni}-{datetime.timestamp(datetime.now())}.csv", "w", newline='') as archivo:
+        escribirArchivo = csv.writer(archivo)
+        escribirArchivo.writerow(["NumeroCuentaOrigen","Valor","FechaOrigen","FechaPago"])
         for cheque in cheques:
-            escribirArchivo.writerow(cheque)
-
-
+            escribirArchivo.writerow([cheque["NumeroCuentaOrigen"], cheque["Valor"], cheque["FechaOrigen"], cheque["FechaPago"]])
 
 
 def main(csv):
     cheques = get_cheques(csv)
     print_cheques(cheques)
-    #export_csv(cheques)
+    export_csv(cheques)
 
 main(archivo)
 
