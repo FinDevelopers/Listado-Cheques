@@ -1,5 +1,6 @@
 # PASO 1 !!
 # importar librerias
+from ast import If
 import csv
 import sys
 import os 
@@ -20,7 +21,6 @@ salida = sys.argv[3]
 tipo = sys.argv[4]
 estado = sys.argv[5] if len(sys.argv) > 5 else None
 fecha = sys.argv[6] if len(sys.argv) > 6 else None
-
 
 # PASO 3 !!
 # PARA VERIFICAR SI EL ARCHIVO EXISTE
@@ -75,7 +75,6 @@ def get_cheques(file):
         cheques = csv.reader(archivo, delimiter=",")
         chequesConFormato = []
         for cheque in cheques:
-            print(cheque)
             chequesConFormato.append(
                 {
                     "NroCheque" : cheque[0],
@@ -92,6 +91,15 @@ def get_cheques(file):
                 })
         chequesConFormato.pop(0)
         return chequesConFormato
+
+def filter_cheques(cheques):
+    chequesFiltrados = []
+    for cheque in cheques:
+        if (int(cheque["DNI"]) == dni) and (cheque["Tipo"] == tipo) and (estado == None or cheque["Estado"] == estado):
+            chequesFiltrados.append(cheque)
+
+    return chequesFiltrados
+
 
 
 def print_cheques(cheques):
@@ -122,8 +130,12 @@ def export_csv(cheques):
 
 def main(csv):
     cheques = get_cheques(csv)
-    print_cheques(cheques)
-    export_csv(cheques)
+    chequesFiltrados = filter_cheques(cheques)
+    
+    if salida == 'PANTALLA':
+         print_cheques(chequesFiltrados)
+    else:
+         export_csv(chequesFiltrados)
 
 main(archivo)
 
