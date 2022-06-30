@@ -1,6 +1,6 @@
 # PASO 1 !!
 # importar librerias
-from ast import If
+from ast import For, If
 import csv
 import sys
 import os 
@@ -59,7 +59,9 @@ if fecha:
         print('Fecha hasta no es correcta')
         exit()
     ddia,dmes,danho = desde.split('-')
+    desde = datetime(int(danho), int(dmes), int(ddia))
     hdia,hmes,hanho = hasta.split('-')
+    hasta = datetime(int(hanho), int(hmes), int(hdia))
 
     if len(ddia) != 2 or len(dmes) != 2 or len(danho) !=4:
         print('Fecha desde no es correcta')
@@ -69,7 +71,6 @@ if fecha:
         print('Fecha hasta no es correcta')
         exit()
     
-
 def get_cheques(file):
     with open(file, 'r') as archivo:
         cheques = csv.reader(archivo, delimiter=",")
@@ -96,12 +97,30 @@ def filter_cheques(cheques):
     chequesFiltrados = []
     for cheque in cheques:
         if (int(cheque["DNI"]) == dni) and (cheque["Tipo"] == tipo) and (estado == None or cheque["Estado"] == estado):
+            if(fecha != None):
+                if(tipo == 'EMITIDO' and desde<=datetime.fromtimestamp(int(cheque['FechaOrigen']))<=hasta):
+                    chequesFiltrados.append(cheque)
+                elif(tipo == 'APROBADO' and desde<=datetime.fromtimestamp(int(cheque['FechaPago']))<=hasta):
+                    chequesFiltrados.append(cheque)
             chequesFiltrados.append(cheque)
 
     return chequesFiltrados
 
+def validar_cheques(cheques):
+    array = []
+    for cheque in cheques:
+        array.append(str(cheque['NroCheque'])+str(cheque['NumeroCuentaOrigen']))
+    if(len(set(array)) != len(array)):
+        print('Error cheques repetidos')
+        exit()
 
-
+""" def validacion_cheques(cheques):
+    flag = False
+    for cheque in cheques:
+        if cheque["DNI"] == cheques[cheque + 1]:
+            flag = True
+    return flag
+ """
 def print_cheques(cheques):
     for cheque in cheques:
         print ("----------------------------------------")   
@@ -121,7 +140,7 @@ def print_cheques(cheques):
 
 
 def export_csv(cheques):
-    with open (f"{dni}-{datetime.timestamp(datetime.now())}.csv", "w", newline='') as archivo:
+    with open (f"{dni}-{int(datetime.now().timestamp())}.csv", "w", newline='') as archivo:
         escribirArchivo = csv.writer(archivo)
         escribirArchivo.writerow(["NumeroCuentaOrigen","Valor","FechaOrigen","FechaPago"])
         for cheque in cheques:
@@ -131,6 +150,7 @@ def export_csv(cheques):
 def main(csv):
     cheques = get_cheques(csv)
     chequesFiltrados = filter_cheques(cheques)
+    validar_cheques(chequesFiltrados)
     
     if salida == 'PANTALLA':
          print_cheques(chequesFiltrados)
@@ -138,6 +158,13 @@ def main(csv):
          export_csv(chequesFiltrados)
 
 main(archivo)
+
+
+# COMANDOS PARA PROBAR
+#python3 listado_cheques.py test.csv 233213214 PANTALLA EMITIDO
+#py listado_cheques.py test.csv 11580999 CSV EMITIDO APROBADO 04-04-2021:04-05-2021 <_-- primer cheque 
+
+
 
 '''
 -------------------
