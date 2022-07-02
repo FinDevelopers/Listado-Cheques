@@ -1,7 +1,3 @@
-# PASO 1 !!
-# importar librerias
-from ast import For, If
-import csv
 import sys
 import os 
 from datetime import datetime
@@ -19,11 +15,22 @@ archivo = sys.argv[1]
 dni = sys.argv[2]
 salida = sys.argv[3]
 tipo = sys.argv[4]
-estado = sys.argv[5] if len(sys.argv) > 5 else None
-fecha = sys.argv[6] if len(sys.argv) > 6 else None
 
-# PASO 3 !!
-# PARA VERIFICAR SI EL ARCHIVO EXISTE
+if len(sys.argv) > 5:
+    if len(sys.argv) > 6:
+        estado = sys.argv[5] 
+        fecha = sys.argv[6] 
+    elif ':' in sys.argv[5]:
+        estado = None
+        fecha = sys.argv[5]
+    else:
+        estado = sys.argv[5]
+        fecha = None
+else:
+    estado = None
+    fecha = None
+
+
 if not os.path.exists(archivo) or not os.path.isfile(archivo):
     print('El archivo no existe')
     exit()
@@ -43,7 +50,7 @@ if tipo not in ['EMITIDO','DEPOSITADO']:
     exit()
 
 if estado and estado not in ['PENDIENTE','APROBADO', 'RECHAZADO']:
-    print('No es un parámetro de tipo válido')
+    print('No es un parámetro de estado válido')
     exit()
 
 # Rango fecha: xx-xx-xxxx:yy-yy-yyyy
@@ -102,7 +109,8 @@ def filter_cheques(cheques):
                     chequesFiltrados.append(cheque)
                 elif(tipo == 'APROBADO' and desde<=datetime.fromtimestamp(int(cheque['FechaPago']))<=hasta):
                     chequesFiltrados.append(cheque)
-            chequesFiltrados.append(cheque)
+            else:
+                chequesFiltrados.append(cheque)
 
     return chequesFiltrados
 
@@ -114,13 +122,6 @@ def validar_cheques(cheques):
         print('Error cheques repetidos')
         exit()
 
-""" def validacion_cheques(cheques):
-    flag = False
-    for cheque in cheques:
-        if cheque["DNI"] == cheques[cheque + 1]:
-            flag = True
-    return flag
- """
 def print_cheques(cheques):
     for cheque in cheques:
         print ("----------------------------------------")   
@@ -163,55 +164,3 @@ main(archivo)
 # COMANDOS PARA PROBAR
 #python3 listado_cheques.py test.csv 233213214 PANTALLA EMITIDO
 #py listado_cheques.py test.csv 11580999 CSV EMITIDO APROBADO 04-04-2021:04-05-2021 <_-- primer cheque 
-
-
-
-'''
--------------------
-CHEQUE
-    CUENTA: 
-    VALOR: $1234.00
-    FECHA ORIGEN:
-    FECHA PAGO:
--------------------
-'''
-
-""" 
-[
-    {
-        'NroCheque': '123456789', 
-        'CodigoBanco': '100', 
-        'CodigoScurusal': '300', 
-        'NumeroCuentaOrigen': '1111111111', 
-        'NumeroCuentaDestino': '2222222222', 
-        'Valor': '532.1', 
-        'FechaOrigen': '1633316400', 
-        'FechaPago': '1664938800', 
-        'DNI': '55555555', 
-        'Estado': 'aprobado'
-    }, 
-    {
-        'NroCheque': '987654321', 
-        'CodigoBanco': '1', 
-        'CodigoScurusal': '1', 
-        'NumeroCuentaOrigen': '2222222222', 
-        'NumeroCuentaDestino': '3333333333', 
-        'Valor': '1000.00', 
-        'FechaOrigen': '1633834800', 
-        'FechaPago': '1634007600', 
-        'DNI': '66666666', 
-        'Estado': 'rechazado'
-    }, 
-    {
-        'NroCheque': '404040404', 
-        'CodigoBanco': '123', 
-        'CodigoScurusal': '80', 
-        'NumeroCuentaOrigen': '1000000000', 
-        'NumeroCuentaDestino': '2000000000', 
-        'Valor': '54341.42', 
-        'FechaOrigen': '1585537200', 
-        'FechaPago': '1589425200', 'DNI': '77777777', 
-        'Estado': 'pendiente'
-    }
-]
- """
