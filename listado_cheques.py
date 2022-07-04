@@ -80,41 +80,53 @@ if fecha:
         exit()
     
 def get_cheques(file):
-    with open(file, 'r') as archivo:
-        cheques = csv.reader(archivo, delimiter=",")
-        chequesConFormato = []
-        for cheque in cheques:
-            chequesConFormato.append(
-                {
-                    "NroCheque" : cheque[0],
-                    "CodigoBanco": cheque[1],
-                    "CodigoScurusal" : cheque[2],
-                    "NumeroCuentaOrigen" : cheque[3],                    
-                    "NumeroCuentaDestino" : cheque[4],
-                    "Valor" : cheque[5],
-                    "FechaOrigen" : cheque[6],
-                    "FechaPago" : cheque[7],
-                    "DNI" : cheque[8],
-                    "Tipo": cheque[9],
-                    "Estado" : cheque[10]
-                })
-        chequesConFormato.pop(0)
-        return chequesConFormato
+        with open(file, 'r') as archivo:
+            cheques = csv.reader(archivo, delimiter=",")
+            chequesConFormato = []
+            for cheque in cheques:
+                try:
+                    chequesConFormato.append(
+                        {
+                            "NroCheque" : cheque[0],
+                            "CodigoBanco": cheque[1],
+                            "CodigoScurusal" : cheque[2],
+                            "NumeroCuentaOrigen" : cheque[3],                    
+                            "NumeroCuentaDestino" : cheque[4],
+                            "Valor" : cheque[5],
+                            "FechaOrigen" : cheque[6],
+                            "FechaPago" : cheque[7],
+                            "DNI" : cheque[8],
+                            "Tipo": cheque[9],
+                            "Estado" : cheque[10]
+                        })
+                except IndexError:
+                    print('Hay una fila con menos de 11 elementos')
+                    exit()
+            try:
+                chequesConFormato.pop(0)
+            except IndexError:
+                print('Pasaste un archivo vacío')
+                exit()
+            return chequesConFormato
 
 def filter_cheques(cheques):
-    chequesFiltrados = []
-    for cheque in cheques:
-        if (int(cheque["DNI"]) == dni) and (cheque["Tipo"] == tipo) and (estado == None or cheque["Estado"] == estado):
-            if(fecha != None):
-                if(tipo == 'EMITIDO' and desde<=datetime.fromtimestamp(int(cheque['FechaOrigen']))<=hasta):
+    try:
+        chequesFiltrados = []
+        for cheque in cheques:
+            if (int(cheque["DNI"]) == dni) and (cheque["Tipo"] == tipo) and (estado == None or cheque["Estado"] == estado):
+                if(fecha != None):
+                    if(tipo == 'EMITIDO' and desde<=datetime.fromtimestamp(int(cheque['FechaOrigen']))<=hasta):
+                        chequesFiltrados.append(cheque)
+                    elif(tipo == 'APROBADO' and desde<=datetime.fromtimestamp(int(cheque['FechaPago']))<=hasta):
+                        chequesFiltrados.append(cheque)
+                else:
                     chequesFiltrados.append(cheque)
-                elif(tipo == 'APROBADO' and desde<=datetime.fromtimestamp(int(cheque['FechaPago']))<=hasta):
-                    chequesFiltrados.append(cheque)
-            else:
-                chequesFiltrados.append(cheque)
 
-    return chequesFiltrados
-
+        return chequesFiltrados
+    except ValueError:
+        print('Los valores en tu csv no son válidos')
+        exit()
+        
 def validar_cheques(cheques):
     array = []
     for cheque in cheques:
